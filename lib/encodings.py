@@ -3,6 +3,7 @@
 # System specific encoding and decoding
 #
 
+
 import sys
 
 def system_encode(s):

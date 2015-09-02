@@ -3,6 +3,7 @@
 # Parse HTTP request from file or from command line
 #
 
+
 import urlparse
 import re
 import os
