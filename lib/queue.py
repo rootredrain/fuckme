@@ -9,7 +9,6 @@ import Queue
 import os
 import re
 
-
 def gen_queue_basic_auth(self):
     f_user = open(self.args.basic[0], 'r')
     f_pass = open(self.args.basic[1], 'r')
