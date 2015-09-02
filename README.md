@@ -6,7 +6,6 @@ fuckme
 - 支持导入大字典(效果未知)
 
 ### To do 
-队列处理上来自其他人代码，还有问题
-
 处理request
 
+HTTP basic 认证
