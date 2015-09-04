@@ -18,6 +18,7 @@ class Scanner():
     def __init__(self):
         self.lock = threading.Lock()
         self.STOP_ME = False
+        parse_args(self)
 
     def print_s(self, s, color_red=False):
         self.lock.acquire()
@@ -30,6 +31,7 @@ class Scanner():
     def run(self):
         self.start_time = time.time()
         self.cracked_count = 0
+        self.print_s('FUCK ME at %s' % self.now_time() + '\n' + '*' * s.console_width)
 
 s = Scanner()
 s.run()
