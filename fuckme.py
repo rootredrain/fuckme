@@ -38,7 +38,11 @@ class Scanner():
         self.start_time = time.time()
         self.cracked_count = 0
         self.print_s('FUCK ME at %s' % self.now_time() + '\n' + '*' * s.console_width)
-        
+        for i in range(self.args.t):
+            t = threading.Thread(target=do_request, args=(s,))
+            t.setDaemon(True)
+            t.start()
+
         while s.request_thread_count > 0:
             time.sleep(0.1)
         s.print_s('_' * s.console_width + '\nTask finished at %s. Cost %.2f seconds' %

@@ -7,6 +7,7 @@ import copy    # deepcopy
 import httplib
 import requests
 from lib.encodings import system_encode
+import base64
 
 def thread_exit(self):
     self.lock.acquire()
@@ -14,10 +15,10 @@ def thread_exit(self):
     self.lock.release()
 
 
-def fake_ip(self, local_headers):
-    if self.args.fip:    # Random IP
-        local_headers['X-Forwarded-For'] = local_headers['Client-IP'] = \
-            '.'.join(str(random.randint(1,255)) for _ in range(4))
+# def fake_ip(self, local_headers):
+#     if self.args.fip:    # Random IP
+#         local_headers['X-Forwarded-For'] = local_headers['Client-IP'] = \
+#             '.'.join(str(random.randint(1,255)) for _ in range(4))
 
 
 def do_request(self):
@@ -33,14 +34,17 @@ def do_request(self):
             thread_exit(self)
             return
 
-        local_headers = copy.deepcopy(self.http_headers)
-        fake_ip(self, local_headers)
+        local_headers = copy.deepcopy('Cookie')
+        # fake_ip(self, local_headers)
 
-        
         if self.args.basic:
             local_headers['Authorization'] = 'Basic ' + base64.b64encode(params)
-        elif self.args.checkproxy:
-            pass
+        else:
+            params = params.split('^^^')    # e.g. params = ['test', '{user}123456']
+            i = 0
+            for key in self.selected_params_keys:
+                params_dict[key] = params[i]
+                i += 1
 
         # conn_func = httplib.HTTPSConnection  if self.args.scm == 'https' else httplib.HTTPConnection
         # conn = conn_func(self.args.netloc, timeout=30)

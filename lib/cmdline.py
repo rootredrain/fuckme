@@ -21,9 +21,6 @@ def parse_args(self):
     target.add_argument('-basic', metavar='',type=str, nargs='+',
                         help='HTTP Basic Auth brute, \ne.g. -basic users.dic pass.dic')
 
-    self.request_thread_count = 1
-
-
     if len(sys.argv) == 1:
         sys.argv.append('-h')
     args = parser.parse_args()
@@ -31,6 +28,10 @@ def parse_args(self):
 
     check_args(args)
     self.args = args
+
+    self.args.t = 1
+
+    self.request_thread_count = self.args.t
 
 
 def check_args(args):
