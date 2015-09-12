@@ -26,3 +26,75 @@ def gen_queue_basic_auth(self):
 
     for i in range(self.args.t):
         self.queue.put(None)
+
+def gen_python_code(self):
+    str_code = str_code_prefix = str_code_postfix = ''
+    indent = 0
+    for param in self.args.d:
+        pname, fname = param.split('=')
+
+        if fname.startswith('md5(') and fname.endswith(')'):         # MD5 32 hash
+            self.args.md5.append(pname)
+            fname = fname[4: -1]
+
+        elif fname.startswith('md5_16(') and fname.endswith(')'):    # MD5 16 hash
+            self.args.md5_16.append(pname)
+            fname = fname[7: -1]
+
+        self.selected_params[pname] =  fname    # e.g {'user': 'user.dic'}
+        self.selected_params_keys.append(pname)
+        if not os.path.exists(fname):
+            raise Exception('File not found: %s' % fname)
+
+        str_code += ' ' * 4 * indent
+        indent += 1
+        str_code_prefix += "file" + str(indent) + " = open(r'" + fname + "', 'r')\n"    # prefix
+        str_code += "file" + str(indent) + ".seek(0)\n"
+        str_code += ' ' * 4 * (indent - 1)
+        str_code += "for line" + str(indent) + " in file" + str(indent) + ":\n"
+        str_code_postfix += 'file' + str(indent) + '.close()\n'    # postfix
+
+    str_code += ' ' * 4 * indent + 'while not self.STOP_ME:\n'
+    indent += 1
+    str_code += ' ' * 4 * indent + 'if self.queue.qsize() < self.args.t * 2:\n'
+    indent += 1
+    str_code += ' ' * 4 * indent
+    index = 1
+    str_line = ''
+    for _ in self.args.d[:-1]:
+        str_line += 'line' + str(index) + ".strip() + '^^^' + "    # values separated by '^^^'
+        index += 1
+    str_line += 'line' + str(index) + '.strip()'
+    str_code += "self.queue.put(" + str_line + ")\n"
+    str_code += ' ' * 4 * indent + 'break\n'
+    str_code += ' ' * 4 * (indent - 1) + 'time.sleep(0.001)\n'
+    if self.args.debug:
+        for i in range(len(self.args.d)):
+            str_code += ' ' * 4 * (indent - 2 - i) + 'break\n'
+    str_code += 'for i in range(self.args.t):\n    self.queue.put(None)\n'
+    str_code = str_code_prefix + str_code + str_code_postfix.strip()
+    return str_code
+
+
+def gen_queue(self):
+
+    self.queue = Queue.Queue()
+    self.args.md5 = self.args.md5_16 = []
+    self.selected_params = {}
+    self.selected_params_keys = []
+
+    if self.args.basic:
+        gen_queue_basic_auth(self)
+        return
+
+
+
+    else:
+        str_code = gen_python_code(self)
+        self.lock.acquire()
+        if self.args.debug:
+            print '[Python code generated]\n'
+            print str_code
+            print '\n' + '*' * self.console_width
+        self.lock.release()
+        exec(str_code)
